@@ -7,6 +7,7 @@
     "node": "20.x"
   },
   "scripts": {
+    "preinstall": "node scripts/clean-puppeteer-cache.js",
     "start": "node src/server.js",
     "dev": "node src/server.js",
     "test": "node test/auth.test.js"

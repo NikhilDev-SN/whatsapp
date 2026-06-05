@@ -127,6 +127,7 @@ git diff --cached
 
 - `whatsapp-web.js` depends on WhatsApp Web and can break if WhatsApp changes its web client.
 - Do not set `PUPPETEER_SKIP_DOWNLOAD=true` for real QR mode unless you also provide a working Chrome/Chromium path with `PUPPETEER_EXECUTABLE_PATH`.
+- If Render still runs plain `npm install`, the repo has a `preinstall` script and `puppeteer.config.cjs` fallback that clear the broken Render Puppeteer cache and use a project-local browser cache.
 - Render needs a persistent disk or the QR login can be lost on redeploys.
 - The app can restrict its own UI and API, but the linked WhatsApp account itself may still have whatever access it has inside WhatsApp. Use a dedicated account that only belongs to **SSR attendence Group** for best isolation.
 # whatsapp
