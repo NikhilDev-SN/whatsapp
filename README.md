@@ -127,3 +127,4 @@ git diff --cached
 - `whatsapp-web.js` depends on WhatsApp Web and can break if WhatsApp changes its web client.
 - Render needs a persistent disk or the QR login can be lost on redeploys.
 - The app can restrict its own UI and API, but the linked WhatsApp account itself may still have whatever access it has inside WhatsApp. Use a dedicated account that only belongs to **SSR attendence Group** for best isolation.
+# whatsapp
