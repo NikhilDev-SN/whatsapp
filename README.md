@@ -54,6 +54,12 @@ Then open `http://localhost:10000`.
 
 `WHATSAPP_GROUP_ID` is preferred because group names can collide or change. It usually looks like `120363000000000000@g.us`.
 
+### Phone Number / Dedicated Account
+
+Do not put your personal mobile number in `.env`; this app does not need it. `whatsapp-web.js` uses the WhatsApp account that scans the QR code.
+
+For the strongest restriction, use a dedicated WhatsApp account/SIM that is only a member of **SSR attendence Group**. A completely fake or dummy WhatsApp account is not practical because WhatsApp requires phone-number verification, but a separate real number used only for this group works well.
+
 ## Render Deployment
 
 1. Push this repository to GitHub.
