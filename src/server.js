@@ -15,6 +15,20 @@ import { createTransport } from "./transport.js";
 const app = express();
 const transport = createTransport();
 
+function ensureTransportStarted() {
+  if (typeof transport.ensureStarted === "function") {
+    return transport.ensureStarted();
+  }
+
+  return transport.start();
+}
+
+function startTransportInBackground() {
+  ensureTransportStarted().catch((error) => {
+    console.error("WhatsApp transport failed to start:", error.message);
+  });
+}
+
 app.set("trust proxy", 1);
 app.use(
   helmet({
@@ -94,6 +108,7 @@ app.post("/api/logout", validateSameOrigin, (req, res) => {
 });
 
 app.get("/api/status", authenticated, (req, res) => {
+  startTransportInBackground();
   res.json({ ok: true, ...transport.getStatus() });
 });
 
@@ -114,6 +129,7 @@ app.post(
   requireJson,
   async (req, res, next) => {
     try {
+      await ensureTransportStarted();
       const message = normalizeMessage(req.body?.message);
 
       if (!message) {
@@ -147,9 +163,9 @@ app.use((error, req, res, next) => {
   res.status(status).json({ ok: false, error: message });
 });
 
-transport.start().catch((error) => {
-  console.error("WhatsApp transport failed to start:", error.message);
-});
+if (config.whatsappAutoStart) {
+  startTransportInBackground();
+}
 
 app.listen(config.port, () => {
   console.log(`SSR attendence sender listening on port ${config.port}`);

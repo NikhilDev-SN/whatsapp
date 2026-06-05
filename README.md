@@ -98,20 +98,27 @@ For the strongest restriction, use a dedicated WhatsApp account/SIM that is only
    - Build command: `rm -rf /opt/render/.cache/puppeteer /opt/render/project/.cache/puppeteer && npm install`
    - Start command: `npm start`
    - Node version: `20.x`
-4. Add a persistent disk:
-   - Mount path: `/var/data`
-   - Size: `1 GB`
+4. Choose the Free instance type.
 5. Set environment variables:
 
 ```env
 NODE_ENV=production
 WHATSAPP_TRANSPORT=webjs
 TARGET_GROUP_NAME=SSR attendence Group
-WWEBJS_AUTH_DIR=/var/data/wwebjs_auth
+WWEBJS_AUTH_DIR=.wwebjs_auth
+WHATSAPP_AUTO_START=false
+WHATSAPP_IDLE_SHUTDOWN_MS=600000
+NODE_OPTIONS=--max-old-space-size=128
 PUPPETEER_CACHE_DIR=/opt/render/project/.cache/puppeteer
 APP_PASSCODE=<your-private-passcode>
 SESSION_SECRET=<long-random-secret>
 WHATSAPP_GROUP_ID=<preferred-group-id-after-setup>
+```
+
+For paid/starter usage, add a persistent disk mounted at `/var/data` and change:
+
+```env
+WWEBJS_AUTH_DIR=/var/data/wwebjs_auth
 ```
 
 Generate a session secret with:
@@ -136,6 +143,7 @@ git diff --cached
 - `whatsapp-web.js` depends on WhatsApp Web and can break if WhatsApp changes its web client.
 - Do not set `PUPPETEER_SKIP_DOWNLOAD=true` for real QR mode unless you also provide a working Chrome/Chromium path with `PUPPETEER_EXECUTABLE_PATH`.
 - If Render still runs plain `npm install`, the repo has a `preinstall` script and `puppeteer.config.cjs` fallback that clear the broken Render Puppeteer cache and use a project-local browser cache.
-- Render needs a persistent disk or the QR login can be lost on redeploys.
+- Free-tier optimization is enabled by default: Chrome starts only after login/status activity and shuts down after `WHATSAPP_IDLE_SHUTDOWN_MS` milliseconds without app activity.
+- Render Free web services spin down after idle time and do not support persistent disks, so WhatsApp QR login can be lost after spin-down, restart, or redeploy. Use a paid service with a persistent disk if you need the linked session to survive.
 - The app can restrict its own UI and API, but the linked WhatsApp account itself may still have whatever access it has inside WhatsApp. Use a dedicated account that only belongs to **SSR attendence Group** for best isolation.
 # whatsapp

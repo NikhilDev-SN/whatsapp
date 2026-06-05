@@ -13,12 +13,15 @@ function userError(message, status = 400) {
 }
 
 export class WebJsTransport {
-  constructor({ groupName, groupId, authDir, executablePath }) {
+  constructor({ groupName, groupId, authDir, executablePath, idleShutdownMs }) {
     this.groupName = groupName;
     this.groupId = groupId;
     this.authDir = authDir;
     this.executablePath = executablePath;
+    this.idleShutdownMs = Number.isFinite(idleShutdownMs) ? idleShutdownMs : 600000;
     this.client = null;
+    this.startPromise = null;
+    this.idleTimer = null;
     this.ready = false;
     this.authenticated = false;
     this.qrDataUrl = null;
@@ -53,10 +56,16 @@ export class WebJsTransport {
           "--disable-gpu",
           "--disable-extensions",
           "--disable-background-networking",
+          "--disable-component-update",
+          "--disable-default-apps",
+          "--disable-domain-reliability",
           "--disable-sync",
+          "--no-default-browser-check",
           "--hide-scrollbars",
           "--mute-audio",
-          "--window-size=1280,720"
+          "--window-size=1280,720",
+          "--js-flags=--max-old-space-size=96",
+          "--disable-features=AcceptCHFrame,BackForwardCache,MediaRouter,OptimizationHints,Translate"
         ]
       },
       webVersionCache: {
@@ -115,9 +124,36 @@ export class WebJsTransport {
   async start() {
     if (this.client) return;
 
-    this.buildClient();
+    try {
+      this.buildClient();
+      await this.client.initialize();
+      this.touch();
+    } catch (error) {
+      const failedClient = this.client;
+      this.client = null;
+      this.ready = false;
+      this.authenticated = false;
+      this.qrDataUrl = null;
+      this.waState = "start_failed";
+      this.lastError = error?.message || String(error);
+      await failedClient?.destroy().catch(() => {});
+      throw error;
+    }
+  }
 
-    await this.client.initialize();
+  ensureStarted() {
+    if (this.client) {
+      this.touch();
+      return Promise.resolve();
+    }
+
+    if (!this.startPromise) {
+      this.startPromise = this.start().finally(() => {
+        this.startPromise = null;
+      });
+    }
+
+    return this.startPromise;
   }
 
   async restart() {
@@ -134,6 +170,37 @@ export class WebJsTransport {
     }
 
     await this.start();
+  }
+
+  async stop(reason = "idle") {
+    const oldClient = this.client;
+    this.client = null;
+    this.ready = false;
+    this.authenticated = false;
+    this.qrDataUrl = null;
+    this.waState = `stopped:${reason}`;
+    this.lastError =
+      reason === "idle"
+        ? "WhatsApp browser paused to save Render memory. Refresh status to restart."
+        : this.lastError;
+
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+
+    await oldClient?.destroy().catch(() => {});
+  }
+
+  touch() {
+    if (!this.client || this.idleShutdownMs <= 0) return;
+
+    if (this.idleTimer) clearTimeout(this.idleTimer);
+
+    this.idleTimer = setTimeout(() => {
+      this.stop("idle").catch(() => {});
+    }, this.idleShutdownMs);
+    this.idleTimer.unref?.();
   }
 
   getStatus() {
@@ -170,6 +237,8 @@ export class WebJsTransport {
   }
 
   async sendMessage(message) {
+    this.touch();
+
     if (!this.ready) {
       throw userError("WhatsApp is not ready yet.", 503);
     }

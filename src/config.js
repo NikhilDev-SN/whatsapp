@@ -24,7 +24,9 @@ export const config = {
   whatsappGroupId: process.env.WHATSAPP_GROUP_ID || "",
   whatsappTransport: process.env.WHATSAPP_TRANSPORT || "webjs",
   authDir: process.env.WWEBJS_AUTH_DIR || path.join(rootDir, ".wwebjs_auth"),
-  puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || ""
+  puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "",
+  whatsappAutoStart: process.env.WHATSAPP_AUTO_START === "true",
+  whatsappIdleShutdownMs: Number(process.env.WHATSAPP_IDLE_SHUTDOWN_MS || 600000)
 };
 
 if (config.nodeEnv === "production") {

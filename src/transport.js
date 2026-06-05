@@ -12,7 +12,8 @@ export function createTransport() {
       groupName: config.targetGroupName,
       groupId: config.whatsappGroupId,
       authDir: config.authDir,
-      executablePath: config.puppeteerExecutablePath
+      executablePath: config.puppeteerExecutablePath,
+      idleShutdownMs: config.whatsappIdleShutdownMs
     });
   }
 

@@ -2,7 +2,7 @@ services:
   - type: web
     name: ssr-attendence-whatsapp
     env: node
-    plan: starter
+    plan: free
     buildCommand: rm -rf /opt/render/.cache/puppeteer /opt/render/project/.cache/puppeteer && npm install
     startCommand: npm start
     autoDeploy: true
@@ -14,7 +14,13 @@ services:
       - key: TARGET_GROUP_NAME
         value: SSR attendence Group
       - key: WWEBJS_AUTH_DIR
-        value: /var/data/wwebjs_auth
+        value: .wwebjs_auth
+      - key: WHATSAPP_AUTO_START
+        value: false
+      - key: WHATSAPP_IDLE_SHUTDOWN_MS
+        value: 600000
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=128
       - key: PUPPETEER_CACHE_DIR
         value: /opt/render/project/.cache/puppeteer
       - key: APP_PASSCODE
@@ -23,7 +29,3 @@ services:
         sync: false
       - key: WHATSAPP_GROUP_ID
         sync: false
-    disk:
-      name: whatsapp-session
-      mountPath: /var/data
-      sizeGB: 1
