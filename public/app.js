@@ -1,7 +1,10 @@
 const state = {
   authenticated: false,
   statusTimer: null,
-  groupName: "SSR attendence Group"
+  groupName: "SSR attendence Group",
+  activeView: "login",
+  lastStatus: null,
+  lastTransientToastAt: 0
 };
 
 const els = {
@@ -47,6 +50,7 @@ async function api(path, options = {}) {
 }
 
 function setView(view) {
+  state.activeView = view;
   els.loginPanel.hidden = view !== "login";
   els.qrPanel.hidden = view !== "qr";
   els.composerPanel.hidden = view !== "composer";
@@ -64,6 +68,8 @@ function toast(message, type = "info") {
 }
 
 function renderStatus(status) {
+  state.lastStatus = status;
+
   if (status.ready) {
     els.connectionState.textContent = "Ready";
     setView("composer");
@@ -105,16 +111,44 @@ async function refreshStatus() {
     const status = await api("/api/status", { method: "GET", headers: {} });
     state.authenticated = true;
     renderStatus(status);
+    return status;
   } catch (error) {
+    if (error.status !== 401) {
+      els.connectionState.textContent = "Reconnecting";
+      if (state.activeView === "login" && state.authenticated) {
+        setView("qr");
+      }
+      const now = Date.now();
+      if (now - state.lastTransientToastAt > 30000) {
+        state.lastTransientToastAt = now;
+        toast("Connection is waking up. Keep this page open.", "error");
+      }
+      return null;
+    }
+
     state.authenticated = false;
     els.connectionState.textContent = "Locked";
     setView("login");
+    return null;
   }
 }
 
-function startStatusLoop() {
-  clearInterval(state.statusTimer);
-  state.statusTimer = setInterval(refreshStatus, 4000);
+function nextPollDelay(status) {
+  if (!state.authenticated) return 0;
+  if (!status) return 8000;
+  if (status.ready) return 60000;
+  if (status.qrDataUrl) return 10000;
+  return 6000;
+}
+
+function startStatusLoop(initialDelay = 0) {
+  clearTimeout(state.statusTimer);
+
+  state.statusTimer = setTimeout(async () => {
+    const status = await refreshStatus();
+    const delay = nextPollDelay(status);
+    if (delay > 0) startStatusLoop(delay);
+  }, initialDelay);
 }
 
 els.loginForm.addEventListener("submit", async (event) => {
@@ -128,7 +162,7 @@ els.loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({ passcode: els.passcode.value })
     });
     els.passcode.value = "";
-    await refreshStatus();
+    state.authenticated = true;
     startStatusLoop();
   } catch (error) {
     toast(error.message, "error");
@@ -139,7 +173,7 @@ els.loginForm.addEventListener("submit", async (event) => {
 
 els.logoutButton.addEventListener("click", async () => {
   await api("/api/logout", { method: "POST", body: "{}" }).catch(() => {});
-  clearInterval(state.statusTimer);
+  clearTimeout(state.statusTimer);
   state.authenticated = false;
   els.connectionState.textContent = "Locked";
   setView("login");
@@ -156,7 +190,8 @@ els.refreshQrButton.addEventListener("click", async () => {
 
   try {
     await api("/api/whatsapp/restart", { method: "POST", body: "{}" });
-    await refreshStatus();
+    const status = await refreshStatus();
+    startStatusLoop(nextPollDelay(status));
   } catch (error) {
     toast(error.message, "error");
   } finally {
@@ -192,5 +227,5 @@ els.messageForm.addEventListener("submit", async (event) => {
 });
 
 await loadConfig().catch(() => {});
-await refreshStatus();
-if (state.authenticated) startStatusLoop();
+const initialStatus = await refreshStatus();
+if (state.authenticated) startStatusLoop(nextPollDelay(initialStatus));

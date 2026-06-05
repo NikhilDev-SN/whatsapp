@@ -84,6 +84,12 @@ If WhatsApp says **couldn't link device**:
 4. Keep the Render page open until the status changes to `Ready`.
 5. If it still fails, redeploy with **Clear build cache & deploy** so Puppeteer starts with a clean browser cache.
 
+If the app asks for the passcode again while the QR is loading:
+
+1. Make sure you are opening the `https://...onrender.com` URL, not plain `http://`.
+2. Keep `SESSION_SECRET` fixed in Render; do not regenerate it on every deploy.
+3. Wait for the app to reconnect. Temporary Render restarts now show `Reconnecting` instead of returning to the passcode screen.
+
 ### Phone Number / Dedicated Account
 
 Do not put your personal mobile number in `.env`; this app does not need it. `whatsapp-web.js` uses the WhatsApp account that scans the QR code.

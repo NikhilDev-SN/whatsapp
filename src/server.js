@@ -15,16 +15,16 @@ import { createTransport } from "./transport.js";
 const app = express();
 const transport = createTransport();
 
-function ensureTransportStarted() {
+function ensureTransportStarted({ touch = true } = {}) {
   if (typeof transport.ensureStarted === "function") {
-    return transport.ensureStarted();
+    return transport.ensureStarted({ touch });
   }
 
   return transport.start();
 }
 
 function startTransportInBackground() {
-  ensureTransportStarted().catch((error) => {
+  ensureTransportStarted({ touch: false }).catch((error) => {
     console.error("WhatsApp transport failed to start:", error.message);
   });
 }
@@ -112,6 +112,11 @@ app.get("/api/status", authenticated, (req, res) => {
   res.json({ ok: true, ...transport.getStatus() });
 });
 
+app.post("/api/whatsapp/keepalive", authenticated, validateSameOrigin, (req, res) => {
+  transport.touch?.();
+  res.json({ ok: true });
+});
+
 app.post("/api/whatsapp/restart", authenticated, validateSameOrigin, async (req, res, next) => {
   try {
     await transport.restart();
@@ -129,7 +134,7 @@ app.post(
   requireJson,
   async (req, res, next) => {
     try {
-      await ensureTransportStarted();
+      await ensureTransportStarted({ touch: true });
       const message = normalizeMessage(req.body?.message);
 
       if (!message) {

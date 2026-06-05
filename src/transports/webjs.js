@@ -141,9 +141,9 @@ export class WebJsTransport {
     }
   }
 
-  ensureStarted() {
+  ensureStarted({ touch = true } = {}) {
     if (this.client) {
-      this.touch();
+      if (touch) this.touch();
       return Promise.resolve();
     }
 
