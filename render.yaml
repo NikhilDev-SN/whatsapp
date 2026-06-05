@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: ssr-attendence-whatsapp
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WHATSAPP_TRANSPORT
+        value: webjs
+      - key: TARGET_GROUP_NAME
+        value: SSR attendence Group
+      - key: WWEBJS_AUTH_DIR
+        value: /var/data/wwebjs_auth
+      - key: APP_PASSCODE
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: WHATSAPP_GROUP_ID
+        sync: false
+    disk:
+      name: whatsapp-session
+      mountPath: /var/data
+      sizeGB: 1

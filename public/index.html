@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SSR attendence Group</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="phone-panel" aria-label="WhatsApp sender">
+        <header class="chat-header">
+          <div class="avatar" aria-hidden="true">SSR</div>
+          <div>
+            <h1 id="groupName">SSR attendence Group</h1>
+            <p id="connectionState">Checking connection</p>
+          </div>
+          <button class="ghost-button" id="logoutButton" type="button" hidden>Sign out</button>
+        </header>
+
+        <section class="login-panel" id="loginPanel">
+          <form id="loginForm" class="login-form">
+            <label for="passcode">Passcode</label>
+            <input id="passcode" name="passcode" type="password" autocomplete="current-password" required />
+            <button type="submit">Unlock</button>
+          </form>
+        </section>
+
+        <section class="qr-panel" id="qrPanel" hidden>
+          <div class="qr-frame">
+            <div class="qr-spinner" id="qrSpinner" aria-hidden="true"></div>
+            <img id="qrImage" alt="WhatsApp QR sign-in code" hidden />
+          </div>
+        </section>
+
+        <section class="composer-panel" id="composerPanel" hidden>
+          <div class="message-stage" aria-live="polite">
+            <div class="empty-state" id="emptyState">
+              <span></span>
+            </div>
+            <div class="sent-bubble" id="sentBubble" hidden></div>
+          </div>
+
+          <form id="messageForm" class="composer">
+            <label class="sr-only" for="message">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="4"
+              maxlength="2000"
+              placeholder="Type message"
+              required
+            ></textarea>
+            <button id="sendButton" type="submit" aria-label="Send message">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12 20 4l-4.2 16-3.6-6.2L4 12Z" />
+                <path d="m12.2 13.8 3.6-9.8" />
+              </svg>
+            </button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
