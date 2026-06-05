@@ -23,7 +23,8 @@ export const config = {
   targetGroupName: process.env.TARGET_GROUP_NAME || "SSR attendence Group",
   whatsappGroupId: process.env.WHATSAPP_GROUP_ID || "",
   whatsappTransport: process.env.WHATSAPP_TRANSPORT || "webjs",
-  authDir: process.env.WWEBJS_AUTH_DIR || path.join(rootDir, ".wwebjs_auth")
+  authDir: process.env.WWEBJS_AUTH_DIR || path.join(rootDir, ".wwebjs_auth"),
+  puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || ""
 };
 
 if (config.nodeEnv === "production") {

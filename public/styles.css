@@ -119,6 +119,13 @@ h1 {
   padding: 28px;
 }
 
+.qr-card {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  width: min(100%, 330px);
+}
+
 .login-form {
   width: 100%;
   max-width: 320px;
@@ -172,6 +179,23 @@ h1 {
   border-radius: 20px;
   background: #ffffff;
   border: 1px solid var(--line);
+}
+
+.qr-copy {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.qr-copy strong {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.qr-copy span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .qr-frame img {

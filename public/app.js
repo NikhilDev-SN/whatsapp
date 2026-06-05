@@ -14,6 +14,8 @@ const els = {
   qrPanel: document.querySelector("#qrPanel"),
   qrSpinner: document.querySelector("#qrSpinner"),
   qrImage: document.querySelector("#qrImage"),
+  qrTitle: document.querySelector("#qrTitle"),
+  qrHint: document.querySelector("#qrHint"),
   composerPanel: document.querySelector("#composerPanel"),
   messageForm: document.querySelector("#messageForm"),
   message: document.querySelector("#message"),
@@ -69,6 +71,8 @@ function renderStatus(status) {
 
   if (status.qrDataUrl) {
     els.connectionState.textContent = "Scan to connect";
+    els.qrTitle.textContent = "Scan QR to connect";
+    els.qrHint.textContent = "WhatsApp > Linked devices > Link a device";
     els.qrImage.src = status.qrDataUrl;
     els.qrImage.hidden = false;
     els.qrSpinner.hidden = true;
@@ -77,6 +81,8 @@ function renderStatus(status) {
   }
 
   els.connectionState.textContent = status.lastError || "Connecting";
+  els.qrTitle.textContent = status.lastError ? "Connection needs attention" : "Waiting for QR";
+  els.qrHint.textContent = status.lastError || "Keep this page open while WhatsApp prepares the QR code.";
   els.qrImage.hidden = true;
   els.qrImage.removeAttribute("src");
   els.qrSpinner.hidden = false;

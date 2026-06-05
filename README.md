@@ -54,6 +54,28 @@ Then open `http://localhost:10000`.
 
 `WHATSAPP_GROUP_ID` is preferred because group names can collide or change. It usually looks like `120363000000000000@g.us`.
 
+### Show the QR Code
+
+To make the QR code appear, your environment must use the real WhatsApp Web transport:
+
+```env
+WHATSAPP_TRANSPORT=webjs
+NODE_ENV=development
+APP_PASSCODE=your-local-passcode
+SESSION_SECRET=your-long-local-session-secret
+PUPPETEER_EXECUTABLE_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe
+```
+
+Then run:
+
+```bash
+npm start
+```
+
+Open the app, enter `APP_PASSCODE`, and wait a few seconds. The QR panel appears when WhatsApp Web is ready to link. Scan it from WhatsApp using **Linked devices**.
+
+If you deploy on Render, leave `PUPPETEER_EXECUTABLE_PATH` blank unless you install and manage your own browser path there. Render can use Puppeteer's downloaded browser during build.
+
 ### Phone Number / Dedicated Account
 
 Do not put your personal mobile number in `.env`; this app does not need it. `whatsapp-web.js` uses the WhatsApp account that scans the QR code.

@@ -11,10 +11,11 @@ function userError(message, status = 400) {
 }
 
 export class WebJsTransport {
-  constructor({ groupName, groupId, authDir }) {
+  constructor({ groupName, groupId, authDir, executablePath }) {
     this.groupName = groupName;
     this.groupId = groupId;
     this.authDir = authDir;
+    this.executablePath = executablePath;
     this.client = null;
     this.ready = false;
     this.authenticated = false;
@@ -33,6 +34,7 @@ export class WebJsTransport {
       }),
       puppeteer: {
         headless: true,
+        ...(this.executablePath ? { executablePath: this.executablePath } : {}),
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",

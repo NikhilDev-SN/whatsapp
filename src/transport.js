@@ -11,7 +11,8 @@ export function createTransport() {
     return new WebJsTransport({
       groupName: config.targetGroupName,
       groupId: config.whatsappGroupId,
-      authDir: config.authDir
+      authDir: config.authDir,
+      executablePath: config.puppeteerExecutablePath
     });
   }
 
