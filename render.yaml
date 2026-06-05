@@ -3,7 +3,7 @@ services:
     name: ssr-attendence-whatsapp
     env: node
     plan: starter
-    buildCommand: npm install
+    buildCommand: rm -rf /opt/render/.cache/puppeteer /opt/render/project/.cache/puppeteer && npm install
     startCommand: npm start
     autoDeploy: true
     envVars:
@@ -15,6 +15,8 @@ services:
         value: SSR attendence Group
       - key: WWEBJS_AUTH_DIR
         value: /var/data/wwebjs_auth
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/.cache/puppeteer
       - key: APP_PASSCODE
         sync: false
       - key: SESSION_SECRET

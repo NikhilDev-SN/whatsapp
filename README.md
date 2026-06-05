@@ -87,9 +87,9 @@ For the strongest restriction, use a dedicated WhatsApp account/SIM that is only
 1. Push this repository to GitHub.
 2. In Render, create a new Blueprint or Web Service from this repo.
 3. Use the included `render.yaml` or these values:
-   - Build command: `npm install`
+   - Build command: `rm -rf /opt/render/.cache/puppeteer /opt/render/project/.cache/puppeteer && npm install`
    - Start command: `npm start`
-   - Node version: Render default Node 18+ is fine
+   - Node version: `20.x`
 4. Add a persistent disk:
    - Mount path: `/var/data`
    - Size: `1 GB`
@@ -100,6 +100,7 @@ NODE_ENV=production
 WHATSAPP_TRANSPORT=webjs
 TARGET_GROUP_NAME=SSR attendence Group
 WWEBJS_AUTH_DIR=/var/data/wwebjs_auth
+PUPPETEER_CACHE_DIR=/opt/render/project/.cache/puppeteer
 APP_PASSCODE=<your-private-passcode>
 SESSION_SECRET=<long-random-secret>
 WHATSAPP_GROUP_ID=<preferred-group-id-after-setup>
@@ -125,6 +126,7 @@ git diff --cached
 ## Limitations
 
 - `whatsapp-web.js` depends on WhatsApp Web and can break if WhatsApp changes its web client.
+- Do not set `PUPPETEER_SKIP_DOWNLOAD=true` for real QR mode unless you also provide a working Chrome/Chromium path with `PUPPETEER_EXECUTABLE_PATH`.
 - Render needs a persistent disk or the QR login can be lost on redeploys.
 - The app can restrict its own UI and API, but the linked WhatsApp account itself may still have whatever access it has inside WhatsApp. Use a dedicated account that only belongs to **SSR attendence Group** for best isolation.
 # whatsapp
