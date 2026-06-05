@@ -24,7 +24,6 @@ export class MockTransport {
     return {
       mode: "mock",
       ready: true,
-      authenticated: true,
       qrDataUrl: null,
       target: this.groupName,
       lastSentAt: this.lastSentAt

@@ -1,7 +1,7 @@
 {
   "name": "ssr-attendence-whatsapp",
   "version": "1.0.0",
-  "description": "A locked-down web sender for one WhatsApp group: SSR attendence Group.",
+  "description": "A simple QR-based web sender for one WhatsApp group: SSR attendence Group.",
   "type": "module",
   "engines": {
     "node": "20.x"
@@ -10,7 +10,7 @@
     "preinstall": "node scripts/clean-puppeteer-cache.js",
     "start": "node --max-old-space-size=128 src/server.js",
     "dev": "node src/server.js",
-    "test": "node test/auth.test.js"
+    "test": "node --check src/server.js && node --check public/app.js && node --check src/transports/webjs.js && node --check src/transports/mock.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

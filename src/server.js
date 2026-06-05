@@ -1,15 +1,8 @@
-import crypto from "node:crypto";
 import path from "node:path";
 import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { config, isProduction } from "./config.js";
-import {
-  clearSessionCookie,
-  createSessionCookie,
-  requireAuth,
-  validateSameOrigin
-} from "./auth.js";
 import { createTransport } from "./transport.js";
 
 const app = express();
@@ -49,21 +42,12 @@ app.use(
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(config.rootDir, "public")));
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
 const sendLimiter = rateLimit({
   windowMs: 60 * 1000,
   limit: 12,
   standardHeaders: true,
   legacyHeaders: false
 });
-
-const authenticated = requireAuth(config.sessionSecret);
 
 function requireJson(req, res, next) {
   if (!req.is("application/json")) {
@@ -77,6 +61,19 @@ function normalizeMessage(value) {
   return value.replace(/\r\n/g, "\n").trim();
 }
 
+function validateSameOrigin(req, res, next) {
+  const origin = req.headers.origin;
+  if (!origin) return next();
+
+  try {
+    if (new URL(origin).host === req.headers.host) return next();
+  } catch {
+    // Fall through to rejection below.
+  }
+
+  return res.status(403).json({ ok: false, error: "Invalid request origin." });
+}
+
 app.get("/api/config", (req, res) => {
   res.json({
     ok: true,
@@ -84,40 +81,12 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-app.post("/api/login", authLimiter, validateSameOrigin, requireJson, (req, res) => {
-  const passcode = String(req.body?.passcode || "");
-  const expected = String(config.appPasscode);
-  const accepted =
-    passcode.length === expected.length &&
-    crypto.timingSafeEqual(Buffer.from(passcode), Buffer.from(expected));
-
-  if (!accepted) {
-    return res.status(401).json({ ok: false, error: "Invalid passcode." });
-  }
-
-  res.setHeader(
-    "Set-Cookie",
-    createSessionCookie({ secret: config.sessionSecret, secure: isProduction() })
-  );
-  return res.json({ ok: true });
-});
-
-app.post("/api/logout", validateSameOrigin, (req, res) => {
-  res.setHeader("Set-Cookie", clearSessionCookie({ secure: isProduction() }));
-  return res.json({ ok: true });
-});
-
-app.get("/api/status", authenticated, (req, res) => {
+app.get("/api/status", (req, res) => {
   startTransportInBackground();
   res.json({ ok: true, ...transport.getStatus() });
 });
 
-app.post("/api/whatsapp/keepalive", authenticated, validateSameOrigin, (req, res) => {
-  transport.touch?.();
-  res.json({ ok: true });
-});
-
-app.post("/api/whatsapp/restart", authenticated, validateSameOrigin, async (req, res, next) => {
+app.post("/api/whatsapp/restart", sendLimiter, validateSameOrigin, async (req, res, next) => {
   try {
     await transport.restart();
     return res.json({ ok: true, ...transport.getStatus() });
@@ -128,7 +97,6 @@ app.post("/api/whatsapp/restart", authenticated, validateSameOrigin, async (req,
 
 app.post(
   "/api/messages",
-  authenticated,
   sendLimiter,
   validateSameOrigin,
   requireJson,

@@ -15,18 +15,9 @@
             <h1 id="groupName">SSR attendence Group</h1>
             <p id="connectionState">Checking connection</p>
           </div>
-          <button class="ghost-button" id="logoutButton" type="button" hidden>Sign out</button>
         </header>
 
-        <section class="login-panel" id="loginPanel">
-          <form id="loginForm" class="login-form">
-            <label for="passcode">Passcode</label>
-            <input id="passcode" name="passcode" type="password" autocomplete="current-password" required />
-            <button type="submit">Unlock</button>
-          </form>
-        </section>
-
-        <section class="qr-panel" id="qrPanel" hidden>
+        <section class="qr-panel" id="qrPanel">
           <div class="qr-card">
             <div class="qr-frame">
               <div class="qr-spinner" id="qrSpinner" aria-hidden="true"></div>
@@ -42,9 +33,6 @@
 
         <section class="composer-panel" id="composerPanel" hidden>
           <div class="message-stage" aria-live="polite">
-            <div class="empty-state" id="emptyState">
-              <span></span>
-            </div>
             <div class="sent-bubble" id="sentBubble" hidden></div>
           </div>
 

@@ -23,7 +23,6 @@ export class WebJsTransport {
     this.startPromise = null;
     this.idleTimer = null;
     this.ready = false;
-    this.authenticated = false;
     this.qrDataUrl = null;
     this.lastError = null;
     this.lastSentAt = null;
@@ -75,7 +74,6 @@ export class WebJsTransport {
 
     this.client.on("qr", async (qr) => {
       this.ready = false;
-      this.authenticated = false;
       this.lastError = null;
       this.lastQrAt = new Date().toISOString();
       this.waState = "qr";
@@ -83,14 +81,12 @@ export class WebJsTransport {
     });
 
     this.client.on("authenticated", () => {
-      this.authenticated = true;
       this.qrDataUrl = null;
       this.waState = "authenticated";
     });
 
     this.client.on("ready", () => {
       this.ready = true;
-      this.authenticated = true;
       this.qrDataUrl = null;
       this.lastError = null;
       this.waState = "ready";
@@ -98,7 +94,6 @@ export class WebJsTransport {
 
     this.client.on("auth_failure", (message) => {
       this.ready = false;
-      this.authenticated = false;
       this.qrDataUrl = null;
       this.waState = "auth_failure";
       this.lastError = message || "WhatsApp authentication failed.";
@@ -106,7 +101,6 @@ export class WebJsTransport {
 
     this.client.on("disconnected", (reason) => {
       this.ready = false;
-      this.authenticated = false;
       this.qrDataUrl = null;
       this.waState = "disconnected";
       this.lastError = reason || "WhatsApp disconnected.";
@@ -132,7 +126,6 @@ export class WebJsTransport {
       const failedClient = this.client;
       this.client = null;
       this.ready = false;
-      this.authenticated = false;
       this.qrDataUrl = null;
       this.waState = "start_failed";
       this.lastError = error?.message || String(error);
@@ -160,7 +153,6 @@ export class WebJsTransport {
     const oldClient = this.client;
     this.client = null;
     this.ready = false;
-    this.authenticated = false;
     this.qrDataUrl = null;
     this.lastError = null;
     this.waState = "restarting";
@@ -176,7 +168,6 @@ export class WebJsTransport {
     const oldClient = this.client;
     this.client = null;
     this.ready = false;
-    this.authenticated = false;
     this.qrDataUrl = null;
     this.waState = `stopped:${reason}`;
     this.lastError =
@@ -207,10 +198,8 @@ export class WebJsTransport {
     return {
       mode: "webjs",
       ready: this.ready,
-      authenticated: this.authenticated,
       qrDataUrl: this.qrDataUrl,
       target: this.groupName,
-      targetLocked: Boolean(this.groupId || this.groupName),
       lastError: this.lastError,
       lastQrAt: this.lastQrAt,
       waState: this.waState,
