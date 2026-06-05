@@ -97,6 +97,15 @@ app.get("/api/status", authenticated, (req, res) => {
   res.json({ ok: true, ...transport.getStatus() });
 });
 
+app.post("/api/whatsapp/restart", authenticated, validateSameOrigin, async (req, res, next) => {
+  try {
+    await transport.restart();
+    return res.json({ ok: true, ...transport.getStatus() });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.post(
   "/api/messages",
   authenticated,

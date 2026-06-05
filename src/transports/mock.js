@@ -8,6 +8,10 @@ export class MockTransport {
     // No-op for local interface checks.
   }
 
+  async restart() {
+    await this.start();
+  }
+
   getStatus() {
     return {
       mode: "mock",

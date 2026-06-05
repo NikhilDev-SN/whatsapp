@@ -16,6 +16,7 @@ const els = {
   qrImage: document.querySelector("#qrImage"),
   qrTitle: document.querySelector("#qrTitle"),
   qrHint: document.querySelector("#qrHint"),
+  refreshQrButton: document.querySelector("#refreshQrButton"),
   composerPanel: document.querySelector("#composerPanel"),
   messageForm: document.querySelector("#messageForm"),
   message: document.querySelector("#message"),
@@ -72,7 +73,9 @@ function renderStatus(status) {
   if (status.qrDataUrl) {
     els.connectionState.textContent = "Scan to connect";
     els.qrTitle.textContent = "Scan QR to connect";
-    els.qrHint.textContent = "WhatsApp > Linked devices > Link a device";
+    els.qrHint.textContent = status.lastQrAt
+      ? "Scan the newest code from WhatsApp > Linked devices > Link a device"
+      : "WhatsApp > Linked devices > Link a device";
     els.qrImage.src = status.qrDataUrl;
     els.qrImage.hidden = false;
     els.qrSpinner.hidden = true;
@@ -82,7 +85,9 @@ function renderStatus(status) {
 
   els.connectionState.textContent = status.lastError || "Connecting";
   els.qrTitle.textContent = status.lastError ? "Connection needs attention" : "Waiting for QR";
-  els.qrHint.textContent = status.lastError || "Keep this page open while WhatsApp prepares the QR code.";
+  els.qrHint.textContent = status.lastError
+    ? `${status.lastError}. Refresh the QR and scan the new code.`
+    : "Keep this page open while WhatsApp prepares the QR code.";
   els.qrImage.hidden = true;
   els.qrImage.removeAttribute("src");
   els.qrSpinner.hidden = false;
@@ -138,6 +143,25 @@ els.logoutButton.addEventListener("click", async () => {
   state.authenticated = false;
   els.connectionState.textContent = "Locked";
   setView("login");
+});
+
+els.refreshQrButton.addEventListener("click", async () => {
+  els.refreshQrButton.disabled = true;
+  els.connectionState.textContent = "Refreshing QR";
+  els.qrTitle.textContent = "Refreshing QR";
+  els.qrHint.textContent = "Wait for a fresh code before scanning again.";
+  els.qrImage.hidden = true;
+  els.qrImage.removeAttribute("src");
+  els.qrSpinner.hidden = false;
+
+  try {
+    await api("/api/whatsapp/restart", { method: "POST", body: "{}" });
+    await refreshStatus();
+  } catch (error) {
+    toast(error.message, "error");
+  } finally {
+    els.refreshQrButton.disabled = false;
+  }
 });
 
 els.messageForm.addEventListener("submit", async (event) => {

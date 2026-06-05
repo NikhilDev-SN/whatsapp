@@ -76,6 +76,14 @@ Open the app, enter `APP_PASSCODE`, and wait a few seconds. The QR panel appears
 
 If you deploy on Render, leave `PUPPETEER_EXECUTABLE_PATH` blank unless you install and manage your own browser path there. Render can use Puppeteer's downloaded browser during build.
 
+If WhatsApp says **couldn't link device**:
+
+1. In WhatsApp, remove old unused linked devices.
+2. On the app page, click **Refresh QR** and wait for a new code.
+3. Scan the new code immediately; QR codes expire quickly.
+4. Keep the Render page open until the status changes to `Ready`.
+5. If it still fails, redeploy with **Clear build cache & deploy** so Puppeteer starts with a clean browser cache.
+
 ### Phone Number / Dedicated Account
 
 Do not put your personal mobile number in `.env`; this app does not need it. `whatsapp-web.js` uses the WhatsApp account that scans the QR code.
